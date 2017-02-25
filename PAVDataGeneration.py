@@ -19,16 +19,38 @@ import socket
 '''
 global variables for moving through generated lists of data
 '''
-global count
-global packetNumber
+
 count = 0
 packetNumber = 0
 
+
+
 '''
 class PAVDataGeneration() is used for generating all the sets of data for the
-    battery, altitude, airspeed, temperature, heading, and the fan RPM. 
+    battery, altitude, airspeed, temperature, heading, and the fan RPM.
+
+Constants are at the top of the class
 '''
+
+
 class PAVDataGeneration():
+
+    def __init__(self):
+
+        #CONSTANTS
+        '''
+        Previously generated values are used to create a more realistic next value.
+        Adjust how many packets are created per generation.
+        When the system sends all packets in the set it starts fresh and generates a new set of packets
+        '''
+        self.PACKETS_PER_SET = 5
+        
+        self.MIN_AIRSPEED = 0 #Minimum value when generating airspeed data
+        self.MAX_AIRSPEED = 30 #Maximum value when generating airspeed data
+        self.NEXT_VALUE_RANGE_AIRSPEED = 2 #The next value generated will be within +- nextValRange of the previous value
+
+
+    
     '''
     Calling batteryDataGeneration returns a list of length 100 of battery values starting at 100,
     and heads to 0.
@@ -138,21 +160,27 @@ class PAVDataGeneration():
         return fanRPMData
                 
     def airspeedDataGeneration(self):
-        speedData = []
-        valPrev = 0
-        while (len(speedData) < 100):
-            val = random.randrange(0, 30, 2)
-            if valPrev >= 28:
-                upperVal = 30
-            else:
-                upperVal = valPrev + 2
-            if valPrev <= 2:
-                lowerVal = 0
-            else:
-                lowerVal = valPrev - 2
+        
+        lowerVal = self.MIN_AIRSPEED
+        upperVal = self.MAX_AIRSPEED
+        speedData = [] #Set to be returned
+        while (len(speedData) < self.PACKETS_PER_SET):
+            isAdded = False;
+            val = random.uniform(self.MIN_AIRSPEED, self.MAX_AIRSPEED)
+            
             if(val >= lowerVal and val <= upperVal):
                 speedData.append(val)
-                valPrev = val
+                isAdded = True
+
+            if isAdded == True:   
+                upperVal = val + self.NEXT_VALUE_RANGE_AIRSPEED
+                lowerVal = val - self.NEXT_VALUE_RANGE_AIRSPEED
+                if upperVal > self.MAX_AIRSPEED:
+                    upperVal = self.MAX_AIRSPEED
+                if lowerVal < self.MIN_AIRSPEED:
+                    lowerVal = self.MAX_AIRSPEED
+                
+                
         return speedData
     
     #this function will be used to send the data generated to a json conversion function
@@ -229,32 +257,38 @@ def PAVUDP():
     sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
 
 def main():
-    for x in range(0,180):
-        time.sleep(.1)
-        PAVUDP()
+    #for x in range(0,3):
+       # time.sleep(.1)
+        PAVDataGeneration().airspeedDataGeneration()
 
 
 #main()
 
 
+
 class UnitTests(unittest.TestCase):
 
-    #UNIT Test 1
-    def testBatteryListSize(self):
-        listOfBatteryVals = PAVDataGeneration().batteryDataGeneration()
-        self.assertTrue(len(listOfBatteryVals) == 100)
+    #Tests if each value is within next value range for 
 
-    #Unit Test 2
-    def testAltitudeValues(self):
-        listOfAltitudeVals = PAVDataGeneration().altitudeDataGeneration()
-        for altitudeVal in listOfAltitudeVals:
-            self.assertGreaterEqual(altitudeVal, 0)
-            self.assertLessEqual(altitudeVal, 10)
+    def testRange(self):
+        ##########
+        #Setup Variables
+        ##########
+        generator = PAVDataGeneration() # Specify the data type/function to be tested, dont invoke with () just reference
+        dataTestRange = 5 #set the range to be testing (change last part to data type name)
+        generator.NEXT_VALUE_RANGE_AIRSPEED = dataTestRange # WILL NEED MODIFICATION TO FIT DATATYPE (Change last part of generator.NEXT_VALUE_RANGE_
+        setsToTest = 10
+        ###############END OF SETUP#############
+
+        for x in range(setsToTest):
+            testSet = generator.airspeedDataGeneration()
+            for index in range(1, len(testSet)):
+                self.assertGreaterEqual(testSet[index], testSet[index-1]-dataTestRange)
+                self.assertLessEqual(testSet[index], testSet[index-1]+dataTestRange)
+                
         
-
-
-
+        
 if __name__ == '__main__':
     unittest.main();
-    
-self.assertGreaterEqual(altitudeVal, 0)
+    testRange();
+
