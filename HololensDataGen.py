@@ -16,6 +16,7 @@ import string
 import time
 import json
 import socket
+import threading
 
 
 
@@ -30,10 +31,11 @@ class PAVDataGenerator:
 
     
    
-    @group Settings: PACKETS_PER_SET, MIN_AIRSPEED, MAX_AIRSPEED, NEXT_VALUE_RANGE_AIRSPEED, MIN_FAN, MAX_FAN, NEXT_VALUE_RANGE_FAN, MIN_TEMP, MAX_TEMP, NEXT_VALUE_RANGE_TEMP, MIN_HEADING, MAX_HEADING, NEXT_VALUE_RANGE_HEADING, MIN_ALTITUDE, MAX_ALTITUDE, NEXT_VALUE_RANGE_ALTITUDE, MIN_BATTERY, MAX_BATTERY, NEXT_VALUE_RANGE_BATTERY  
+    @group Settings: PACKETS_PER_SET, NUM_DEICIMAL, MIN_AIRSPEED, MAX_AIRSPEED, NEXT_VALUE_RANGE_AIRSPEED, MIN_FAN, MAX_FAN, NEXT_VALUE_RANGE_FAN, MIN_TEMP, MAX_TEMP, NEXT_VALUE_RANGE_TEMP, MIN_HEADING, MAX_HEADING, NEXT_VALUE_RANGE_HEADING, MIN_ALTITUDE, MAX_ALTITUDE, NEXT_VALUE_RANGE_ALTITUDE, MIN_BATTERY, MAX_BATTERY, NEXT_VALUE_RANGE_BATTERY  
     @cvar : Settings and Variables 
     @cvar MIN_AIRSPEED: The minimum possible airspeed value for the generator to use
     @cvar MAX_AIRSPEED: The maximum possible airspeed value for the generator to use
+    @cvar NUM_DECIMALS: The number of decimals to round 2
     @cvar NEXT_VALUE_RANGE_AIRSPEED: For all values after the first one the next airspeed value will be within +- NEXT_VALUE_RANGE_AIRSPEED of the previous value
     @cvar PACKETS_PER_SET: The number of packets generated before the generator starts fresh
     @cvar MIN_FAN: The minimum possible fan rpm, value for the generator to use
@@ -71,6 +73,7 @@ class PAVDataGenerator:
     
     #Constants (set these)
     PACKETS_PER_SET = 500
+    NUM_DECIMALS = 2
 
     MIN_AIRSPEED = 0  
     MAX_AIRSPEED = 30
@@ -95,6 +98,7 @@ class PAVDataGenerator:
     MIN_BATTERY = 0  
     MAX_BATTERY = 30
     NEXT_VALUE_RANGE_BATTERY = 2
+    
 
     
 
@@ -118,13 +122,13 @@ class PAVDataGenerator:
 
         batteryData = []  # Set to be returned
         firstVal = random.uniform(self.MIN_BATTERY, self.MAX_BATTERY)
-        batteryData.append(firstVal)
+        batteryData.append(round(firstVal, self.NUM_DECIMALS))
         lowerVal = firstVal - self.NEXT_VALUE_RANGE_BATTERY
         upperVal = firstVal + self.NEXT_VALUE_RANGE_BATTERY
         
         while len(batteryData) < self.PACKETS_PER_SET:
             val = random.uniform(lowerVal, upperVal)
-            batteryData.append(val)
+            batteryData.append(round(val, self.NUM_DECIMALS))
 
             upperVal = val + self.NEXT_VALUE_RANGE_BATTERY
             lowerVal = val - self.NEXT_VALUE_RANGE_BATTERY
@@ -142,13 +146,13 @@ class PAVDataGenerator:
         
         altitudeData = []  # Set to be returned
         firstVal = random.uniform(self.MIN_ALTITUDE, self.MAX_ALTITUDE)
-        altitudeData.append(firstVal)
+        altitudeData.append(round(firstVal, self.NUM_DECIMALS))
         lowerVal = firstVal - self.NEXT_VALUE_RANGE_ALTITUDE
         upperVal = firstVal + self.NEXT_VALUE_RANGE_ALTITUDE
         
         while len(altitudeData) < self.PACKETS_PER_SET:
             val = random.uniform(lowerVal, upperVal)
-            altitudeData.append(val)
+            altitudeData.append(round(val, self.NUM_DECIMALS))
 
             upperVal = val + self.NEXT_VALUE_RANGE_ALTITUDE
             lowerVal = val - self.NEXT_VALUE_RANGE_ALTITUDE
@@ -166,13 +170,13 @@ class PAVDataGenerator:
 
         headingData = []  # Set to be returned
         firstVal = random.uniform(self.MIN_HEADING, self.MAX_HEADING)
-        headingData.append(firstVal)
+        headingData.append(round(firstVal, self.NUM_DECIMALS))
         lowerVal = firstVal - self.NEXT_VALUE_RANGE_HEADING
         upperVal = firstVal + self.NEXT_VALUE_RANGE_HEADING
         
         while len(headingData) < self.PACKETS_PER_SET:
             val = random.uniform(lowerVal, upperVal)
-            headingData.append(val)
+            headingData.append(round(val, self.NUM_DECIMALS))
 
             upperVal = val + self.NEXT_VALUE_RANGE_HEADING
             lowerVal = val - self.NEXT_VALUE_RANGE_HEADING
@@ -191,13 +195,13 @@ class PAVDataGenerator:
         
         tempData = []  # Set to be returned
         firstVal = random.uniform(self.MIN_TEMP, self.MAX_TEMP)
-        tempData.append(firstVal)
+        tempData.append(round(firstVal, self.NUM_DECIMALS))
         lowerVal = firstVal - self.NEXT_VALUE_RANGE_TEMP
         upperVal = firstVal + self.NEXT_VALUE_RANGE_TEMP
         
         while len(tempData) < self.PACKETS_PER_SET:
             val = random.uniform(lowerVal, upperVal)
-            tempData.append(val)
+            tempData.append(round(val, self.NUM_DECIMALS))
 
             upperVal = val + self.NEXT_VALUE_RANGE_TEMP
             lowerVal = val - self.NEXT_VALUE_RANGE_TEMP
@@ -216,13 +220,13 @@ class PAVDataGenerator:
         
         fanData = []  # Set to be returned
         firstVal = random.uniform(self.MIN_FAN, self.MAX_FAN)
-        fanData.append(firstVal)
+        fanData.append(round(firstVal, self.NUM_DECIMALS))
         lowerVal = firstVal - self.NEXT_VALUE_RANGE_FAN
         upperVal = firstVal + self.NEXT_VALUE_RANGE_FAN
         
         while len(fanData) < self.PACKETS_PER_SET:
             val = random.uniform(lowerVal, upperVal)
-            fanData.append(val)
+            fanData.append(round(val, self.NUM_DECIMALS))
 
             upperVal = val + self.NEXT_VALUE_RANGE_FAN
             lowerVal = val - self.NEXT_VALUE_RANGE_FAN
@@ -242,13 +246,13 @@ class PAVDataGenerator:
         
         speedData = []  # Set to be returned
         firstVal = random.uniform(self.MIN_AIRSPEED, self.MAX_AIRSPEED)
-        speedData.append(firstVal)
+        speedData.append(round(firstVal, self.NUM_DECIMALS))
         lowerVal = firstVal - self.NEXT_VALUE_RANGE_AIRSPEED
         upperVal = firstVal + self.NEXT_VALUE_RANGE_AIRSPEED
         
         while len(speedData) < self.PACKETS_PER_SET:
             val = random.uniform(lowerVal, upperVal)
-            speedData.append(val)
+            speedData.append(round(val, self.NUM_DECIMALS))
 
             upperVal = val + self.NEXT_VALUE_RANGE_AIRSPEED
             lowerVal = val - self.NEXT_VALUE_RANGE_AIRSPEED
@@ -270,127 +274,147 @@ class PAVDataGenerator:
         """
         
         
-        if self.setCount >= self.PACKETS_PER_SET or setCount == 0:
-            if self.setCount >=  self.PACKETS_PER_SET:
-                self.setCount = 0
+        if self.setCount >= self.PACKETS_PER_SET or self.setCount == 0:
+            
                 
-                self.batteryLevel = self.batteryDataGeneration()
-                self.altitudeLevel = self.altitudeDataGeneration()
-                self.headingDirection = self.headingDataGeneration()
-                self.airspeedLevel = self.airspeedDataGeneration()
-                self.temperatureLevel = self.temperatureDataGeneration()
-                self.fanRPM = self.fanRPMDataGeneration()
-                self.packetNumber = packetNumber + 1
-                dataPacket = [
-                    self.batteryLevel[count],
-                    self.altitudeLevel[count],
-                    self.headingDirection,
-                    self.airspeedLevel[count],
-                    self.temperatureLevel[count],
-                    self.fanRPM[count],
-                    self.packetNumber,
-                    ]
-                self.setCount = self.setCount + 1
-                return dataPacket
-        elif self.setCount <= self.PACKETS_PER_SET and self.setCount != 0:
+            self.batteryLevel = self.batteryDataGeneration()
+            self.altitudeLevel = self.altitudeDataGeneration()
             self.headingDirection = self.headingDataGeneration()
-            self.packetNumber = packetNumber + 1
-            dataPacket = [
-                self.batteryLevel[count],
-                self.altitudeLevel[count],
-                self.headingDirection,
-                self.airspeedLevel[count],
-                self.temperatureLevel[count],
-                self.fanRPM[count],
-                self.packetNumber,
-                ]
-            self.setCount = setCount + 1
-            return dataPacket
+            self.airspeedLevel = self.airspeedDataGeneration()
+            self.temperatureLevel = self.temperatureDataGeneration()
+            self.fanRPM = self.fanRPMDataGeneration()
+            if self.setCount >= self.PACKETS_PER_SET:
+                self.setCount = 0
 
+        self.packetNumber = self.packetNumber + 1
+        dataPacket = [
+            self.batteryLevel[self.setCount],
+            self.altitudeLevel[self.setCount],
+            self.headingDirection[self.setCount],
+            self.airspeedLevel[self.setCount],
+            self.temperatureLevel[self.setCount],
+            self.fanRPM[self.setCount],
+            self.packetNumber,
+            ]
+        self.setCount = self.setCount + 1
 
-class PAVDataStructure:
-    """
-    This class has an antribute/field for each data type.
-    It is used as a struct to store each packet and is used by json for encoding
-    """
-    def __init__(
-        self,
-        batteryData,
-        altitudeData,
-        headingData,
-        speedData,
-        tempData,
-        fanData,
-        packetNumber,
-        ):
+        return dataPacket
         
-        self.batteryData = batteryData
-        self.altitudeData = altitudeData
-        self.headingData = headingData
-        self.speedData = speedData
-        self.tempData = tempData
-        self.fanData = fanData
-        self.packetNumber = packetNumber
+            
 
 
-def jsonDefault(object):
-    return object.__dict__
+class GenerateAndBroadcast:
 
 
-def jsonConversion():
-    """
-    Gets a packet from the data generator
-    Puts each generated packet into an instance the struct tyoe.
-    The struct containing the data is converted to a string using JSON
-    This generated string is what is sent over UDP
-    """
-    
-    PAVGeneratedData = PAVDataGenerator().PAVDataCollection()
-    dataPacket1 = PAVDataStructure(
-        PAVGeneratedData[0],
-        PAVGeneratedData[1],
-        PAVGeneratedData[2],
-        PAVGeneratedData[3],
-        PAVGeneratedData[4],
-        PAVGeneratedData[5],
-        PAVGeneratedData[6],
-        )
-    jsonPAVDataStructure = json.dumps(dataPacket1, default=jsonDefault)
-    return str(jsonPAVDataStructure)
+    '''
+    Use an instance of this class to invoke the PAV Data Generator.
+    Data packs will start being continiously both on construction (calls sendUDP()) or when startUDP() is called
+    data packets will contine to be send until stopUDP() is called.
+
+    @param:hololens_ip: The ip of the hololens (s string)
+    @param:hololens_port: the port the hololens is listening on (as int)
+    @parem:delay: The amount of time (sleep) between each packet
+    @cvar:isGenerating: is the generating on and sending data
+    '''
+
+    def __init__(self, hololens_ip, hololens_port, delay):
+        self.ip = hololens_ip
+        self.port = hololens_port
+        self.datagen = PAVDataGenerator()
+        #constants can be set at the top of PAVDataGenerator Class
+        self.isGenerating = True;
+        self.waitTime = delay
+        self.generationKiller = threading.Event()
+        self.generationThread = threading.Thread(target=self.__startThread, args=(self.generationKiller, self.ip, self.port))
+        self.generationThread.start()
+        
+    def jsonDefault(self, object):
+        '''
+        needed for json generation
+        '''
+
+        return object.__dict__
 
 
-def sendUDP(udp_ip, udp_port):
-    """
-    Sends the JSON generated string to the hololens via UDP
-    THIS IS THE FUNCTION TO CALL FROM MAIN
-    GIVE IT AN UP AND PORT TO SEND DATA TO HOLOLENS
-
-    @param udp_ip: The IP of the Hololens to send data to
-    @param udp_port: The used to connect to the hololens
-    """
-    
-    
-    data = jsonConversion()
-
-    # print ("UDP target IP:", UDP_IP)
-    # print ("UDP target port:", UDP_PORT)
-
-    #print MESSAGE
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
-    sock.sendto(data, (udp_ip, udp_port))
-
-"""
-def main():
-
-    # for x in range(0,3):
-       # time.sleep(.1)
-
-    PAVDataGeneration().airspeedDataGeneration()
+    def jsonConversion(self, PAVGeneratedData):
+        """
+        Gets a packet from the data generator
+        Puts each generated packet into an instance the struct tyoe.
+        The struct containing the data is converted to a string using JSON
+        This generated string is what is sent over UDP
+        """
+        
+        dataPacket = self.PAVDataStructure(
+            PAVGeneratedData[0], # battery
+            PAVGeneratedData[1], # altitude
+            PAVGeneratedData[2], # heading
+            PAVGeneratedData[3], # airspeed 
+            PAVGeneratedData[4], # temp
+            PAVGeneratedData[5], # fan
+            PAVGeneratedData[6], # packet number
+            )
+        jsonPAVDataStructure = json.dumps(dataPacket, default=self.jsonDefault)
+        return str(jsonPAVDataStructure)
 
 
-# main()
-"""
+    def __startThread(self, generationKiller, udp_ip, udp_port):
+        """
+        Sends the JSON generated string to the hololens via UDP continiously until stop udp is called
+        @param udp_ip: The IP of the Hololens to send data to
+        @param udp_port: The used to connect to the hololens
+        """
+
+        while not generationKiller.wait(self.waitTime):
+            data = self.datagen.PAVDataCollection()
+            packet = self.jsonConversion(data)
+            print(packet)
+            #sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+            #sock.sendto(packet, (udp_ip, udp_port))
+
+    def start(self):
+        '''
+        use to start sending packets (happens automatically on construnction)
+        '''
+        self.stop()
+        self.generationThread = threading.Thread(target=self.__startThread, args=(self.generationKiller, self.ip, self.port))
+        
+    def stop(self):
+        self.generationKiller.set()
+        self.generationThread.join()
+        self.generationKiller = threading.Event()
+        
+
+    def resetPacketNumber(self):
+        '''
+        resets the data generator instance (packet count etc)
+        '''
+        self.datagen = PAVDataGenerator()
+
+    class PAVDataStructure:
+        """
+        This class has an antribute/field for each data type.
+        It is used as a struct to store each packet and is used by json for encoding
+        """
+
+        def __init__(
+            self,
+            batteryData,
+            altitudeData,
+            headingData,
+            speedData,
+            tempData,
+            fanData,
+            packetNumber,
+            ):
+            
+            self.batteryData = batteryData
+            self.altitudeData = altitudeData
+            self.headingData = headingData
+            self.speedData = speedData
+            self.tempData = tempData
+            self.fanData = fanData
+            self.packetNumber = packetNumber
+
 
 class UnitTests(unittest.TestCase):
 
@@ -398,7 +422,8 @@ class UnitTests(unittest.TestCase):
 
     def testNextValRangeANDSetSize(self):
 
-        # #########
+        # tests all data types for size and next val range
+        ##########
         # Setup Variables
         # #########
 
@@ -450,7 +475,12 @@ class UnitTests(unittest.TestCase):
    
             
 if __name__ == '__main__':
-    unittest.main()
+
+    gen = GenerateAndBroadcast("1111",1111,2)
+    time.sleep(10)
+    gen.stop()
+    
+    #unittest.main()
     
 
 
