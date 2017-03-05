@@ -30,12 +30,29 @@ class PAVDataGenerator:
 
     
    
-    @group Settings: PACKETS_PER_SET, MIN_AIRSPEED, MAX_AIRSPEED, NEXT_VALUE_RANGE_AIRSPEED
+    @group Settings: PACKETS_PER_SET, MIN_AIRSPEED, MAX_AIRSPEED, NEXT_VALUE_RANGE_AIRSPEED, MIN_FAN, MAX_FAN, NEXT_VALUE_RANGE_FAN, MIN_TEMP, MAX_TEMP, NEXT_VALUE_RANGE_TEMP, MIN_HEADING, MAX_HEADING, NEXT_VALUE_RANGE_HEADING, MIN_ALTITUDE, MAX_ALTITUDE, NEXT_VALUE_RANGE_ALTITUDE, MIN_BATTERY, MAX_BATTERY, NEXT_VALUE_RANGE_BATTERY  
     @cvar : Settings and Variables 
     @cvar MIN_AIRSPEED: The minimum possible airspeed value for the generator to use
     @cvar MAX_AIRSPEED: The maximum possible airspeed value for the generator to use
     @cvar NEXT_VALUE_RANGE_AIRSPEED: For all values after the first one the next airspeed value will be within +- NEXT_VALUE_RANGE_AIRSPEED of the previous value
     @cvar PACKETS_PER_SET: The number of packets generated before the generator starts fresh
+    @cvar MIN_FAN: The minimum possible fan rpm, value for the generator to use
+    @cvar MAX_FAN: The maximum possible fan rpm value for the generator to use
+    @cvar NEXT_VALUE_RANGE_FAN: For all values after the first one the next value will be within +- NEXT_VALUE_RANGE_FAN of the previous value
+    @cvar MIN_TEMP: The minimum possible temp, value for the generator to use
+    @cvar MAX_TEMP: The maximum possible temp value for the generator to use
+    @cvar NEXT_VALUE_RANGE_TEMP all values after the first one the next value will be within +- NEXT_VALUE_RANGE_TEMP of the previous value
+    @cvar MIN_HEADING: The minimum possible heading, value for the generator to use
+    @cvar MAX_HEADING: The maximum possible heading value for the generator to use
+    @cvar NEXT_VALUE_RANGE_HEADING all values after the first one the next value will be within +- NEXT_VALUE_RANGE_HEADING of the previous value
+    @cvar MIN_ALTITUDE: The minimum possible altitude, value for the generator to use
+    @cvar MAX_ALTITUDE: The maximum possible altitude value for the generator to use
+    @cvar NEXT_VALUE_RANGE_ALTITUDE all values after the first one the next value will be within +- NEXT_VALUE_RANGE_ALTITUDE of the previous value
+    @cvar MIN_BATTERY: The minimum possible battery, value for the generator to use
+    @cvar MAX_BATTERY: The maximum possible battery value for the generator to use
+    @cvar NEXT_VALUE_RANGE_BATTERY all values after the first one the next value will be within +- NEXT_VALUE_RANGE_BATTERY of the previous value
+
+
 
     @group Storage: setCount, packetNumber, batteryLevel, altitudeLevel, headingDirection, airspeedLevel, temperatureLevel, fanRPM
     @cvar setCount: The current packet to be sent in the generated set
@@ -52,15 +69,36 @@ class PAVDataGenerator:
 
     """
     
-    #Constants
-    PACKETS_PER_SET = 5
+    #Constants (set these)
+    PACKETS_PER_SET = 500
+
     MIN_AIRSPEED = 0  
     MAX_AIRSPEED = 30
-    NEXT_VALUE_RANGE_AIRSPEED = 2  
+    NEXT_VALUE_RANGE_AIRSPEED = 2
+    
+    MIN_FAN = 0  
+    MAX_FAN = 30
+    NEXT_VALUE_RANGE_FAN = 2
+    
+    MIN_TEMP = 0  
+    MAX_TEMP = 30
+    NEXT_VALUE_RANGE_TEMP = 2
+
+    MIN_HEADING = 0  
+    MAX_HEADING = 30
+    NEXT_VALUE_RANGE_HEADING = 2
+
+    MIN_ALTITUDE = 0  
+    MAX_ALTITUDE = 30
+    NEXT_VALUE_RANGE_ALTITUDE = 2
+
+    MIN_BATTERY = 0  
+    MAX_BATTERY = 30
+    NEXT_VALUE_RANGE_BATTERY = 2
 
     
-    
-    #Variables
+
+    #Variables/Storage (leave these alone)
     setCount = 0
     packetNumber = 0
     batteryLevel = []
@@ -74,104 +112,134 @@ class PAVDataGenerator:
     
 
     def batteryDataGeneration(self):
+        '''
+        Returns a a set of random set of battery data, using previous values to generate next ones
+        '''
 
-        batteryData = []
-        valPrev = 100
-        while len(batteryData) < 100:
-            val = random.randrange(0, 100, 2)
-            if valPrev > 98:
-                upperVal = 100
-            else:
-                upperVal = valPrev + 2
-            if valPrev < 2:
-                lowerVal = 0
-            else:
-                lowerVal = valPrev - 2
-            if val >= lowerVal and val <= upperVal and val <= valPrev:
-                batteryData.append(val)
-                valPrev = val
+        batteryData = []  # Set to be returned
+        firstVal = random.uniform(self.MIN_BATTERY, self.MAX_BATTERY)
+        batteryData.append(firstVal)
+        lowerVal = firstVal - self.NEXT_VALUE_RANGE_BATTERY
+        upperVal = firstVal + self.NEXT_VALUE_RANGE_BATTERY
+        
+        while len(batteryData) < self.PACKETS_PER_SET:
+            val = random.uniform(lowerVal, upperVal)
+            batteryData.append(val)
+
+            upperVal = val + self.NEXT_VALUE_RANGE_BATTERY
+            lowerVal = val - self.NEXT_VALUE_RANGE_BATTERY
+            if upperVal > self.MAX_BATTERY:
+                upperVal = self.MAX_BATTERY
+            if lowerVal < self.MIN_BATTERY:
+                lowerVal = self.MIN_BATTERY
+
         return batteryData
 
     def altitudeDataGeneration(self):
-        altitudeData = []
-        valPrev = 0
-        while len(altitudeData) < 100:
-            val = random.randrange(0, 11, 1)
-            if valPrev == 10:
-                upperVal = 11
-            else:
-                upperVal = valPrev + 1
-            if valPrev == 1:
-                lowerVal = 0
-            else:
-                lowerVal = valPrev - 1
-            if val >= lowerVal and val <= upperVal:
-                altitudeData.append(val)
-                valPrev = val
+        '''
+        Returns a a set of random altitudes, using previous values to generate next ones
+        '''
+        
+        altitudeData = []  # Set to be returned
+        firstVal = random.uniform(self.MIN_ALTITUDE, self.MAX_ALTITUDE)
+        altitudeData.append(firstVal)
+        lowerVal = firstVal - self.NEXT_VALUE_RANGE_ALTITUDE
+        upperVal = firstVal + self.NEXT_VALUE_RANGE_ALTITUDE
+        
+        while len(altitudeData) < self.PACKETS_PER_SET:
+            val = random.uniform(lowerVal, upperVal)
+            altitudeData.append(val)
+
+            upperVal = val + self.NEXT_VALUE_RANGE_ALTITUDE
+            lowerVal = val - self.NEXT_VALUE_RANGE_ALTITUDE
+            if upperVal > self.MAX_ALTITUDE:
+                upperVal = self.MAX_ALTITUDE
+            if lowerVal < self.MIN_ALTITUDE:
+                lowerVal = self.MIN_ALTITUDE
+
         return altitudeData
 
     def headingDataGeneration(self):
         '''
-        Returns a random heading (does not use previous values)
+        Returns a a set of random headings in degree's, using previous values to generate next ones
         '''
 
-        headingVal = 'N'
-        val = random.randint(0, 7)
-        if val == 0:
-            headingVal = 'N'
-        elif val == 1:
-            headingVal = 'NE'
-        elif val == 2:
-            headingVal = 'E'
-        elif val == 3:
-            headingVal = 'SE'
-        elif val == 4:
-            headingVal = 'S'
-        elif val == 5:
-            headingVal = 'SW'
-        elif val == 6:
-            headingVal = 'W'
-        elif val == 7:
-            headingVal == 'NW'
-        return headingVal
+        headingData = []  # Set to be returned
+        firstVal = random.uniform(self.MIN_HEADING, self.MAX_HEADING)
+        headingData.append(firstVal)
+        lowerVal = firstVal - self.NEXT_VALUE_RANGE_HEADING
+        upperVal = firstVal + self.NEXT_VALUE_RANGE_HEADING
+        
+        while len(headingData) < self.PACKETS_PER_SET:
+            val = random.uniform(lowerVal, upperVal)
+            headingData.append(val)
+
+            upperVal = val + self.NEXT_VALUE_RANGE_HEADING
+            lowerVal = val - self.NEXT_VALUE_RANGE_HEADING
+            if upperVal > self.MAX_HEADING:
+                upperVal = self.MAX_HEADING
+            if lowerVal < self.MIN_HEADING:
+                lowerVal = self.MIN_HEADING
+
+        return headingData
+
 
     def temperatureDataGeneration(self):
-        temperatureData = []
-        valPrev = 150
-        while len(temperatureData) < 100:
-            val = random.randrange(0, 150, 5)
-            if valPrev > 145:
-                upperVal = 150
-            else:
-                upperVal = valPrev + 5
-            if valPrev < 5:
-                lowerVal = 0
-            else:
-                lowerVal = valPrev - 5
-            if val >= lowerVal and val <= upperVal and val <= valPrev:
-                temperatureData.append(val)
-                valPrev = val
-        return temperatureData
+        '''
+        Returns a a set of temperature, using previous values to generate next ones
+        '''
+        
+        tempData = []  # Set to be returned
+        firstVal = random.uniform(self.MIN_TEMP, self.MAX_TEMP)
+        tempData.append(firstVal)
+        lowerVal = firstVal - self.NEXT_VALUE_RANGE_TEMP
+        upperVal = firstVal + self.NEXT_VALUE_RANGE_TEMP
+        
+        while len(tempData) < self.PACKETS_PER_SET:
+            val = random.uniform(lowerVal, upperVal)
+            tempData.append(val)
+
+            upperVal = val + self.NEXT_VALUE_RANGE_TEMP
+            lowerVal = val - self.NEXT_VALUE_RANGE_TEMP
+            if upperVal > self.MAX_TEMP:
+                upperVal = self.MAX_TEMP
+            if lowerVal < self.MIN_TEMP:
+                lowerVal = self.MIN_TEMP
+
+        return tempData
+
 
     def fanRPMDataGeneration(self):
-        fanRPMData = []
-        valPrev = 0
-        while len(fanRPMData) < 100:
-            val = random.randrange(0, 25000, 5000)
-            if valPrev >= 20000:
-                upperVal = 25000
-            else:
-                upperVal = valPrev + 5000
-            if valPrev <= 5000:
-                lowerVal = 0
-            else:
-                lowerVal = valPrev - 5000
-            if val >= lowerVal and val <= upperVal:
-                fanRPMData.append(val)
-                valPrev = val
-        return fanRPMData
+        '''
+        Returns a a set of fan, using previous values to generate next ones
+        '''
+        
+        fanData = []  # Set to be returned
+        firstVal = random.uniform(self.MIN_FAN, self.MAX_FAN)
+        fanData.append(firstVal)
+        lowerVal = firstVal - self.NEXT_VALUE_RANGE_FAN
+        upperVal = firstVal + self.NEXT_VALUE_RANGE_FAN
+        
+        while len(fanData) < self.PACKETS_PER_SET:
+            val = random.uniform(lowerVal, upperVal)
+            fanData.append(val)
 
+            upperVal = val + self.NEXT_VALUE_RANGE_FAN
+            lowerVal = val - self.NEXT_VALUE_RANGE_FAN
+            if upperVal > self.MAX_FAN:
+                upperVal = self.MAX_FAN
+            if lowerVal < self.MIN_FAN:
+                lowerVal = self.MIN_FAN
+
+        return fanData
+
+
+                
     def airspeedDataGeneration(self):
+        '''
+        Returns a a set of random airspeed data, using previous values to generate next ones
+        '''
+        
         speedData = []  # Set to be returned
         firstVal = random.uniform(self.MIN_AIRSPEED, self.MAX_AIRSPEED)
         speedData.append(firstVal)
@@ -328,26 +396,59 @@ class UnitTests(unittest.TestCase):
 
     # Tests if each value is within next value range for
 
-    def testRange(self):
+    def testNextValRangeANDSetSize(self):
 
         # #########
         # Setup Variables
         # #########
 
         generator = PAVDataGenerator()  # Specify the data type/function to be tested, dont invoke with () just reference
-        dataTestRange = 5  # set the range to be testing (change last part to data type name)
-        generator.NEXT_VALUE_RANGE_AIRSPEED = dataTestRange  # WILL NEED MODIFICATION TO FIT DATATYPE (Change last part of generator.NEXT_VALUE_RANGE_
-        setsToTest = 10
+        setsToTest = 100
 
         ###############END OF SETUP#############
-
+    
         for x in range(setsToTest):
-            testSet = generator.airspeedDataGeneration()
+            testSet = generator.airspeedDataGeneration() # SELECT TYPE
             for index in range(1, len(testSet)):
-                self.assertGreaterEqual(testSet[index], testSet[index- 1]- dataTestRange)
-                self.assertLessEqual(testSet[index], testSet[index - 1] + dataTestRange)
+                self.assertGreaterEqual(testSet[index], testSet[index- 1]- generator.NEXT_VALUE_RANGE_AIRSPEED) # modify to fit type
+                self.assertLessEqual(testSet[index], testSet[index - 1] + generator.NEXT_VALUE_RANGE_AIRSPEED)
+                self.assertEqual(len(testSet), generator.PACKETS_PER_SET)
+
+            testSet = generator.altitudeDataGeneration() # SELECT TYPE
+            for index in range(1, len(testSet)):
+                self.assertGreaterEqual(testSet[index], testSet[index- 1]- generator.NEXT_VALUE_RANGE_ALTITUDE) # modify to fit type
+                self.assertLessEqual(testSet[index], testSet[index - 1] + generator.NEXT_VALUE_RANGE_ALTITUDE)
+                self.assertEqual(len(testSet), generator.PACKETS_PER_SET)
+
+            testSet = generator.fanRPMDataGeneration() # SELECT TYPE
+            for index in range(1, len(testSet)):
+                self.assertGreaterEqual(testSet[index], testSet[index- 1]- generator.NEXT_VALUE_RANGE_FAN) # modify to fit type
+                self.assertLessEqual(testSet[index], testSet[index - 1] + generator.NEXT_VALUE_RANGE_FAN)
+                self.assertEqual(len(testSet), generator.PACKETS_PER_SET)
+
+            testSet = generator.temperatureDataGeneration() # SELECT TYPE
+            for index in range(1, len(testSet)):
+                self.assertGreaterEqual(testSet[index], testSet[index- 1]- generator.NEXT_VALUE_RANGE_TEMP) # modify to fit type
+                self.assertLessEqual(testSet[index], testSet[index - 1] + generator.NEXT_VALUE_RANGE_TEMP)
+                self.assertEqual(len(testSet), generator.PACKETS_PER_SET)
+                
+            testSet = generator.headingDataGeneration() # SELECT TYPE
+            for index in range(1, len(testSet)):
+                self.assertGreaterEqual(testSet[index], testSet[index- 1]- generator.NEXT_VALUE_RANGE_HEADING) # modify to fit type
+                self.assertLessEqual(testSet[index], testSet[index - 1] + generator.NEXT_VALUE_RANGE_HEADING)
+                self.assertEqual(len(testSet), generator.PACKETS_PER_SET)
+
+            testSet = generator.batteryDataGeneration() # SELECT TYPE
+            for index in range(1, len(testSet)):
+                self.assertGreaterEqual(testSet[index], testSet[index- 1]- generator.NEXT_VALUE_RANGE_BATTERY) # modify to fit type
+                self.assertLessEqual(testSet[index], testSet[index - 1] + generator.NEXT_VALUE_RANGE_BATTERY)
+                self.assertEqual(len(testSet), generator.PACKETS_PER_SET)
 
 
+    
+
+   
+            
 if __name__ == '__main__':
     unittest.main()
     
