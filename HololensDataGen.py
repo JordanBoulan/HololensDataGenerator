@@ -1,6 +1,4 @@
-
-
-'''
+"""
 Data Generatior code for PAV graphics and animation
 Contributers: Allen Black, Jordan Boulanger
 Creation Date: 10/26/2016
@@ -8,7 +6,7 @@ Last Modified Date: 02/26/17
 Description: There are 6 sets of data that are generated randomly, but form a general pattern by using previous values to generate future values.
 These sets of data are then parsed through and one-by-one, each data point in the set
 is converted to JSON and then sent as a message via UDP
-'''
+"""
 
 import unittest
 import random
@@ -31,8 +29,8 @@ class PAVDataGenerator:
 
     
    
-    @group Settings: PACKETS_PER_SET, NUM_DEICIMAL, MIN_AIRSPEED, MAX_AIRSPEED, NEXT_VALUE_RANGE_AIRSPEED, MIN_FAN, MAX_FAN, NEXT_VALUE_RANGE_FAN, MIN_TEMP, MAX_TEMP, NEXT_VALUE_RANGE_TEMP, MIN_HEADING, MAX_HEADING, NEXT_VALUE_RANGE_HEADING, MIN_ALTITUDE, MAX_ALTITUDE, NEXT_VALUE_RANGE_ALTITUDE, MIN_BATTERY, MAX_BATTERY, NEXT_VALUE_RANGE_BATTERY  
-    @cvar : Settings and Variables 
+    @group Settings: PACKETS_PER_SET, NUM_DECIMALS, MIN_AIRSPEED, MAX_AIRSPEED, NEXT_VALUE_RANGE_AIRSPEED, MIN_FAN, MAX_FAN, NEXT_VALUE_RANGE_FAN, MIN_TEMP, MAX_TEMP, NEXT_VALUE_RANGE_TEMP, MIN_HEADING, MAX_HEADING, NEXT_VALUE_RANGE_HEADING, MIN_ALTITUDE, MAX_ALTITUDE, NEXT_VALUE_RANGE_ALTITUDE, MIN_BATTERY, MAX_BATTERY, NEXT_VALUE_RANGE_BATTERY  
+    @cvar : Settings 
     @cvar MIN_AIRSPEED: The minimum possible airspeed value for the generator to use
     @cvar MAX_AIRSPEED: The maximum possible airspeed value for the generator to use
     @cvar NUM_DECIMALS: The number of decimals to round 2
@@ -57,14 +55,14 @@ class PAVDataGenerator:
 
 
     @group Storage: setCount, packetNumber, batteryLevel, altitudeLevel, headingDirection, airspeedLevel, temperatureLevel, fanRPM
-    @cvar setCount: The current packet to be sent in the generated set
-    @cvar packetNumber: The number of packets sent in total (accross all generated sets)
-    @cvar batteryLevel: The current set of battery data
-    @cvar altitudeLevel: The current set of altitude data
-    @cvar headingDirection: The curret set of heading data
-    @cvar airspeedLevel: The current set of airspeed data
-    @cvar temperatureLevel: The current set of temprature data
-    @cvar fanRPM: The current set of fan data
+    @ivar setCount: The current packet to be sent in the generated set
+    @ivar packetNumber: The number of packets sent in total (accross all generated sets)
+    @ivar batteryLevel: The current set of battery data
+    @ivar altitudeLevel: The current set of altitude data
+    @ivar headingDirection: The curret set of heading data
+    @ivar airspeedLevel: The current set of airspeed data
+    @ivar temperatureLevel: The current set of temprature data
+    @ivar fanRPM: The current set of fan data
 
     @sort: Settings, Storage
     
@@ -99,26 +97,26 @@ class PAVDataGenerator:
     MAX_BATTERY = 30
     NEXT_VALUE_RANGE_BATTERY = 2
     
-
     
-
-    #Variables/Storage (leave these alone)
-    setCount = 0
-    packetNumber = 0
-    batteryLevel = []
-    altitudeLevel = []
-    headingDirection = ""
-    airspeedLevel = []
-    temperatureLevel = []
-    fanRPM = []
+    
+    def __init__(self):
+        #Variables/Storage (leave these alone)
+        self.setCount = 0
+        self.packetNumber = 0
+        self.batteryLevel = []
+        self.altitudeLevel = []
+        self.headingDirection = ""
+        self.airspeedLevel = []
+        self.temperatureLevel = []
+        self.fanRPM = []
 
     
     
 
     def batteryDataGeneration(self):
-        '''
+        """
         Returns a a set of random set of battery data, using previous values to generate next ones
-        '''
+        """
 
         batteryData = []  # Set to be returned
         firstVal = random.uniform(self.MIN_BATTERY, self.MAX_BATTERY)
@@ -140,9 +138,9 @@ class PAVDataGenerator:
         return batteryData
 
     def altitudeDataGeneration(self):
-        '''
+        """
         Returns a a set of random altitudes, using previous values to generate next ones
-        '''
+        """
         
         altitudeData = []  # Set to be returned
         firstVal = random.uniform(self.MIN_ALTITUDE, self.MAX_ALTITUDE)
@@ -164,9 +162,9 @@ class PAVDataGenerator:
         return altitudeData
 
     def headingDataGeneration(self):
-        '''
+        """
         Returns a a set of random headings in degree's, using previous values to generate next ones
-        '''
+        """
 
         headingData = []  # Set to be returned
         firstVal = random.uniform(self.MIN_HEADING, self.MAX_HEADING)
@@ -189,9 +187,9 @@ class PAVDataGenerator:
 
 
     def temperatureDataGeneration(self):
-        '''
+        """
         Returns a a set of temperature, using previous values to generate next ones
-        '''
+        """
         
         tempData = []  # Set to be returned
         firstVal = random.uniform(self.MIN_TEMP, self.MAX_TEMP)
@@ -214,9 +212,9 @@ class PAVDataGenerator:
 
 
     def fanRPMDataGeneration(self):
-        '''
+        """
         Returns a a set of fan, using previous values to generate next ones
-        '''
+        """
         
         fanData = []  # Set to be returned
         firstVal = random.uniform(self.MIN_FAN, self.MAX_FAN)
@@ -240,9 +238,9 @@ class PAVDataGenerator:
 
                 
     def airspeedDataGeneration(self):
-        '''
+        """
         Returns a a set of random airspeed data, using previous values to generate next ones
-        '''
+        """
         
         speedData = []  # Set to be returned
         firstVal = random.uniform(self.MIN_AIRSPEED, self.MAX_AIRSPEED)
@@ -306,32 +304,37 @@ class PAVDataGenerator:
 class GenerateAndBroadcast:
 
 
-    '''
+    """
     Use an instance of this class to invoke the PAV Data Generator.
     Data packs will start being continiously both on construction (calls sendUDP()) or when startUDP() is called
     data packets will contine to be send until stopUDP() is called.
+    
+    
+    @ivar isPrinting: if True, packets are printed to the python console.
+    """
 
-    @param:hololens_ip: The ip of the hololens (s string)
-    @param:hololens_port: the port the hololens is listening on (as int)
-    @parem:delay: The amount of time (sleep) between each packet
-    @cvar:isGenerating: is the generating on and sending data
-    '''
+    isPrinting = False;
 
     def __init__(self, hololens_ip, hololens_port, delay):
+        """
+        This is the constructor
+        @param hololens_ip: The ip of the hololens (s string)
+        @param hololens_port: the port the hololens is listening on (as int)
+        @param delay: The amount of time (sleep) between each packet
+        """
+        
         self.ip = hololens_ip
         self.port = hololens_port
         self.datagen = PAVDataGenerator()
         #constants can be set at the top of PAVDataGenerator Class
-        self.isGenerating = True;
         self.waitTime = delay
         self.generationKiller = threading.Event()
-        self.generationThread = threading.Thread(target=self.__startThread, args=(self.generationKiller, self.ip, self.port))
-        self.generationThread.start()
+        self.isFirstStart = True;
         
     def jsonDefault(self, object):
-        '''
+        """
         needed for json generation
-        '''
+        """
 
         return object.__dict__
 
@@ -365,29 +368,40 @@ class GenerateAndBroadcast:
         """
 
         while not generationKiller.wait(self.waitTime):
-            data = self.datagen.PAVDataCollection()
-            packet = self.jsonConversion(data)
-            print(packet)
-            #sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
-            #sock.sendto(packet, (udp_ip, udp_port))
+            data = self.datagen.PAVDataCollection() #Get your data from sensors or whereever
+            packet = self.jsonConversion(data) #convert struct instance to string with json
+            if self.isPrinting:
+                print(packet)
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+            sock.sendto(packet, (udp_ip, udp_port))
 
     def start(self):
-        '''
-        use to start sending packets (happens automatically on construnction)
-        '''
-        self.stop()
+        """
+        use to start sending packets (on its own thread)
+        """
+        if not self.isFirstStart:
+            self.stop()
+        else:
+            self.isFirstStart = False
         self.generationThread = threading.Thread(target=self.__startThread, args=(self.generationKiller, self.ip, self.port))
+        self.generationThread.start()
+        print("Data Generation and Broadcast started!")
         
     def stop(self):
+        """
+        Stop generation and end the generation thread
+        """
         self.generationKiller.set()
         self.generationThread.join()
         self.generationKiller = threading.Event()
+        print("Data Generation and Broadcast stopped!")
         
 
     def resetPacketNumber(self):
-        '''
+        """
         resets the data generator instance (packet count etc)
-        '''
+        """
+        
         self.datagen = PAVDataGenerator()
 
     class PAVDataStructure:
@@ -476,11 +490,21 @@ class UnitTests(unittest.TestCase):
             
 if __name__ == '__main__':
 
-    gen = GenerateAndBroadcast("1111",1111,2)
+    port = 1111
+    delayBetweenPacketsSeconds = 1
+    gen = GenerateAndBroadcast("192.168.1.1",port,delayBetweenPacketsSeconds)
+    gen.MAX_AIRSPEED = 30
+    # Or set the constants in the code they are static and all have defaults
+    gen.start()
+    # generates in its own thread, you can continue to use the main thread while it running
+    gen.isPrinting = True;
     time.sleep(10)
+    gen.isPrinting = False;
+    print("doing other things while it generates")
+    time.sleep(2)
     gen.stop()
     
-    #unittest.main()
+    
     
 
 
